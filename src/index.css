@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+/* Leaflet container adjustments for full height */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background-color: #0c0a09;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Custom popup styling for Leaflet */
+.leaflet-popup-content-wrapper {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
+}
+
+.leaflet-popup-tip {
+  background: #0f172a !important;
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px !important;
+  line-height: 1.4 !important;
+}
+
+/* Pulsing radar effect for GPS user position */
+@keyframes ping-slow {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+}
+
+.gps-radar-pulse {
+  animation: ping-slow 2.5s infinite ease-in-out;
+}

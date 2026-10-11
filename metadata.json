@@ -1,0 +1,11 @@
+{
+  "name": "BackCountry GPS Pro - Levantamiento de Campo y Fotos Georeferenciadas",
+  "description": "Aplicación profesional de captura de waypoints GPS estilo BackCountry con formulario técnico de campo, cálculo WGS84/UTM y cámara con estampado de coordenadas y datos sobre la fotografía.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
