@@ -129,12 +129,20 @@ export const MapView: React.FC<MapViewProps> = ({
     baseTileLayerRef.current = newBase;
   }, [activeLayer]);
 
+  const hasInitialCenteredRef = useRef<boolean>(false);
+
   // Actualizar marcador de posición actual del usuario y radio de precisión
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map || !currentGps) return;
 
     const pos: L.LatLngExpression = [currentGps.latitude, currentGps.longitude];
+
+    // Al iniciar, centrar automáticamente en tiempo real en la imagen satelital del lugar del dispositivo
+    if (!hasInitialCenteredRef.current) {
+      map.setView(pos, 18, { animate: true });
+      hasInitialCenteredRef.current = true;
+    }
 
     // Icono de usuario personalizado con rumbo
     const heading = compassHeading || 0;

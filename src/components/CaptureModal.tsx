@@ -41,6 +41,14 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   const acc = existingWaypoint?.accuracy ?? initialGps?.accuracy ?? 4.5;
   const heading = existingWaypoint?.heading ?? compassHeading ?? 120;
 
+  // Actualizar coordenadas en tiempo real al detectar señal GPS
+  useEffect(() => {
+    if (!existingWaypoint && initialGps) {
+      setLat(initialGps.latitude);
+      setLon(initialGps.longitude);
+    }
+  }, [initialGps, existingWaypoint]);
+
   // Campos principales simplificados para celular
   const [pointName, setPointName] = useState(
     existingWaypoint?.name ||

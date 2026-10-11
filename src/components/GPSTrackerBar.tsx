@@ -11,6 +11,7 @@ interface GPSTrackerBarProps {
   onStartAveraging: () => void;
   onCaptureClick: () => void;
   error?: string | null;
+  isOnline?: boolean;
 }
 
 export const GPSTrackerBar: React.FC<GPSTrackerBarProps> = ({
@@ -21,6 +22,7 @@ export const GPSTrackerBar: React.FC<GPSTrackerBarProps> = ({
   onStartAveraging,
   onCaptureClick,
   error,
+  isOnline = true,
 }) => {
   const [copied, setCopied] = React.useState(false);
 
@@ -40,6 +42,19 @@ export const GPSTrackerBar: React.FC<GPSTrackerBarProps> = ({
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
         {/* Bloque Izquierdo: Coordenadas y Telemetría */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          {/* Estado de Red Offline / Online */}
+          <div
+            className={`flex items-center gap-1.5 px-2 py-0.5 rounded border text-[11px] font-mono ${
+              isOnline
+                ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-300'
+                : 'bg-amber-950/90 border-amber-500/70 text-amber-300 font-bold'
+            }`}
+            title={isOnline ? 'Dispositivo con conexión a Internet' : 'Modo Offline: Operando 100% sin conexión con almacenamiento local'}
+          >
+            <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-400' : 'bg-amber-400 animate-ping'}`} />
+            <span>{isOnline ? 'En Línea' : 'Offline (Sin Internet)'}</span>
+          </div>
+
           {/* Estado de Señal Satelital */}
           <div className="flex items-center gap-1.5 bg-stone-950/80 px-2.5 py-1 rounded border border-stone-800 font-mono text-xs">
             <Satellite

@@ -15,97 +15,104 @@ export function useGPS() {
   // Iniciar seguimiento GPS
   useEffect(() => {
     if (!('geolocation' in navigator)) {
-      setError('La geolocalización no es compatible con este navegador.');
+      setError('La geolocalización no es compatible con este dispositivo.');
       return;
     }
 
     setIsWatching(true);
 
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        const { latitude, longitude, altitude, accuracy, heading, speed } = position.coords;
-        const utm = latLonToUTM(latitude, longitude);
+    const updatePosition = (position: GeolocationPosition) => {
+      const { latitude, longitude, altitude, accuracy, heading, speed } = position.coords;
+      const utm = latLonToUTM(latitude, longitude);
 
-        const current: GPSReading = {
-          latitude,
-          longitude,
-          altitude: altitude !== null ? altitude : 2600, // Altitud estimada si el hardware no la expone
-          accuracy: accuracy || 5,
-          heading: heading !== null && !isNaN(heading) ? heading : null,
-          speed: speed !== null ? speed : 0,
-          timestamp: position.timestamp,
-          utm,
-        };
+      const current: GPSReading = {
+        latitude,
+        longitude,
+        altitude: altitude !== null ? altitude : 2600,
+        accuracy: accuracy || 5,
+        heading: heading !== null && !isNaN(heading) ? heading : null,
+        speed: speed !== null ? speed : 0,
+        timestamp: position.timestamp,
+        utm,
+      };
 
-        setReading(current);
-        setError(null);
+      setReading(current);
+      setError(null);
 
-        // Si está en modo promedio
-        if (isAveraging) {
-          samplesRef.current.push(current);
-          setAverageCount(samplesRef.current.length);
+      // Si está en modo promedio
+      if (isAveraging) {
+        samplesRef.current.push(current);
+        setAverageCount(samplesRef.current.length);
 
-          if (samplesRef.current.length >= 10) {
-            // Calcular promedio de 10 muestras
-            const samples = samplesRef.current;
-            const avgLat = samples.reduce((acc, s) => acc + s.latitude, 0) / samples.length;
-            const avgLon = samples.reduce((acc, s) => acc + s.longitude, 0) / samples.length;
-            const avgAlt = samples.reduce((acc, s) => acc + (s.altitude || 0), 0) / samples.length;
-            const avgAcc = samples.reduce((acc, s) => acc + s.accuracy, 0) / samples.length;
+        if (samplesRef.current.length >= 10) {
+          const samples = samplesRef.current;
+          const avgLat = samples.reduce((acc, s) => acc + s.latitude, 0) / samples.length;
+          const avgLon = samples.reduce((acc, s) => acc + s.longitude, 0) / samples.length;
+          const avgAlt = samples.reduce((acc, s) => acc + (s.altitude || 0), 0) / samples.length;
+          const avgAcc = samples.reduce((acc, s) => acc + s.accuracy, 0) / samples.length;
 
-            const avgUTM = latLonToUTM(avgLat, avgLon);
+          const avgUTM = latLonToUTM(avgLat, avgLon);
 
-            setAveragedReading({
-              latitude: avgLat,
-              longitude: avgLon,
-              altitude: avgAlt,
-              accuracy: Math.max(avgAcc * 0.7, 0.5), // El promedio reduce el error típico
-              heading: current.heading,
-              speed: 0,
-              timestamp: Date.now(),
-              utm: avgUTM,
-            });
-            setIsAveraging(false);
-          }
-        }
-      },
-      (err) => {
-        let msg = 'Error obteniendo posición GPS';
-        if (err.code === err.PERMISSION_DENIED) {
-          msg = 'Permiso GPS denegado. Activa la ubicación en los ajustes del navegador.';
-        } else if (err.code === err.POSITION_UNAVAILABLE) {
-          msg = 'Señal GPS no disponible temporalmente.';
-        } else if (err.code === err.TIMEOUT) {
-          msg = 'Tiempo de espera agotado buscando señal GPS.';
-        }
-        setError(msg);
-
-        // Si falla el GPS real en el navegador, proveer ubicación inicial realista de trabajo (Bogotá / Sabana / Los Andes)
-        if (!reading) {
-          const fallbackLat = 4.60971;
-          const fallbackLon = -74.08175;
-          setReading({
-            latitude: fallbackLat,
-            longitude: fallbackLon,
-            altitude: 2640,
-            accuracy: 4.2,
-            heading: 145,
+          setAveragedReading({
+            latitude: avgLat,
+            longitude: avgLon,
+            altitude: avgAlt,
+            accuracy: Math.max(avgAcc * 0.7, 0.5),
+            heading: current.heading,
             speed: 0,
             timestamp: Date.now(),
-            utm: latLonToUTM(fallbackLat, fallbackLon),
+            utm: avgUTM,
           });
+          setIsAveraging(false);
         }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 1000,
       }
-    );
+    };
+
+    const handleError = (err: GeolocationPositionError) => {
+      let msg = 'Error obteniendo posición GPS';
+      if (err.code === err.PERMISSION_DENIED) {
+        msg = 'Permiso GPS denegado. Activa la ubicación en los ajustes del navegador.';
+      } else if (err.code === err.POSITION_UNAVAILABLE) {
+        msg = 'Buscando satélites GPS...';
+      } else if (err.code === err.TIMEOUT) {
+        msg = 'Tiempo de espera agotado buscando satélites.';
+      }
+      setError(msg);
+
+      // Solo si después de varios intentos no hay lectura real, usar coordenadas de referencia
+      setReading((prev) => {
+        if (prev) return prev;
+        const fallbackLat = 4.60971;
+        const fallbackLon = -74.08175;
+        return {
+          latitude: fallbackLat,
+          longitude: fallbackLon,
+          altitude: 2640,
+          accuracy: 4.2,
+          heading: 145,
+          speed: 0,
+          timestamp: Date.now(),
+          utm: latLonToUTM(fallbackLat, fallbackLon),
+        };
+      });
+    };
+
+    // 1. Obtener fijación inicial inmediata
+    navigator.geolocation.getCurrentPosition(updatePosition, handleError, {
+      enableHighAccuracy: true,
+      timeout: 8000,
+      maximumAge: 0,
+    });
+
+    // 2. Seguimiento continuo en tiempo real
+    const watchId = navigator.geolocation.watchPosition(updatePosition, handleError, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 1000,
+    });
 
     // Escuchar orientación del dispositivo para la brújula
     const handleOrientation = (e: DeviceOrientationEvent) => {
-      // Si el navegador soporta el azimut absoluto
       let heading: number | null = null;
       if ((e as any).webkitCompassHeading) {
         heading = (e as any).webkitCompassHeading;
@@ -134,7 +141,7 @@ export function useGPS() {
     setIsAveraging(true);
   }, []);
 
-  // Función para actualizar coordenadas manualmente (útil para pruebas o en gabinete)
+  // Función para actualizar coordenadas manualmente
   const setManualCoordinates = useCallback((lat: number, lon: number, alt?: number) => {
     const utm = latLonToUTM(lat, lon);
     setReading({

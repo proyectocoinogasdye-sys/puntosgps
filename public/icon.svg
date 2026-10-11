@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#0c0a09"/>
+  <circle cx="256" cy="256" r="210" fill="none" stroke="#292524" stroke-width="8"/>
+  <circle cx="256" cy="256" r="180" fill="none" stroke="#d97706" stroke-width="4" stroke-dasharray="8 8"/>
+  <circle cx="256" cy="256" r="140" fill="#1c1917" stroke="#44403c" stroke-width="4"/>
+  <!-- Crosshairs -->
+  <line x1="256" y1="46" x2="256" y2="466" stroke="#f59e0b" stroke-width="3" opacity="0.4"/>
+  <line x1="46" y1="256" x2="466" y2="256" stroke="#f59e0b" stroke-width="3" opacity="0.4"/>
+  <!-- Compass Needle -->
+  <polygon points="256,100 290,256 222,256" fill="#ef4444"/>
+  <polygon points="256,412 290,256 222,256" fill="#f8fafc"/>
+  <circle cx="256" cy="256" r="24" fill="#0c0a09" stroke="#f59e0b" stroke-width="6"/>
+  <!-- Cardinal Points -->
+  <text x="256" y="90" fill="#f59e0b" font-size="32" font-family="monospace" font-weight="bold" text-anchor="middle">N</text>
+  <text x="430" y="266" fill="#78716c" font-size="28" font-family="monospace" font-weight="bold" text-anchor="middle">E</text>
+  <text x="256" y="446" fill="#78716c" font-size="28" font-family="monospace" font-weight="bold" text-anchor="middle">S</text>
+  <text x="82" y="266" fill="#78716c" font-size="28" font-family="monospace" font-weight="bold" text-anchor="middle">W</text>
+</svg>

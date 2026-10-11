@@ -177,7 +177,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   <span className="bg-amber-600 text-stone-950 text-[9px] px-1.5 py-0.2 rounded font-mono font-bold uppercase">Pro</span>
                 </h4>
                 <p className="text-[11px] text-stone-400">
-                  Descarga archivo ZIP con el CSV de datos y todas las fotos estampadas en alta resolución con coordenadas
+                  Descarga archivo ZIP con el CSV de datos, archivo KML (Google Earth), GeoJSON y todas las fotos estampadas con coordenadas
                 </p>
               </div>
             </div>

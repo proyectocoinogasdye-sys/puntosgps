@@ -1,0 +1,18 @@
+{
+  "name": "BackCountry GPS Pro - Levantamiento de Campo Offline",
+  "short_name": "BackCountry GPS",
+  "description": "Aplicación profesional para levantamiento de waypoints GPS con fotos georeferenciadas y funcionamiento 100% offline sin internet.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0a09",
+  "theme_color": "#0c0a09",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

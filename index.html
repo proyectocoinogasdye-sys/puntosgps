@@ -9,6 +9,15 @@
     <meta property="og:description" content="Aplicación profesional de captura de waypoints GPS estilo BackCountry con formulario técnico de campo, cálculo WGS84/UTM y cámara con estampado de coordenadas y datos sobre la fotografía." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    
+    <!-- PWA & Mobile Settings -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0c0a09" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,5 +26,16 @@
   <body class="bg-stone-950 text-stone-100 antialiased selection:bg-amber-500 selection:text-black">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then((reg) => {
+            console.log('Service Worker registrado para soporte 100% offline:', reg.scope);
+          }).catch((err) => {
+            console.warn('Error registrando Service Worker:', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>

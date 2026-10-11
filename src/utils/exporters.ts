@@ -77,9 +77,9 @@ export function exportToCSV(waypoints: Waypoint[], filename = 'levantamiento_gps
 }
 
 /**
- * Genera y descarga un archivo KML para Google Earth
+ * Genera el string XML KML para Google Earth
  */
-export function exportToKML(waypoints: Waypoint[], filename = 'levantamiento_gps.kml') {
+export function generateKMLString(waypoints: Waypoint[]): string {
   const placemarks = waypoints.map((w) => {
     const lat = w.latitude;
     const lon = w.longitude;
@@ -121,7 +121,7 @@ export function exportToKML(waypoints: Waypoint[], filename = 'levantamiento_gps
     </Placemark>`;
   }).join('\n');
 
-  const kmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Document>
     <name>Levantamiento GPS BackCountry Pro</name>
@@ -129,7 +129,13 @@ export function exportToKML(waypoints: Waypoint[], filename = 'levantamiento_gps
     ${placemarks}
   </Document>
 </kml>`;
+}
 
+/**
+ * Genera y descarga un archivo KML para Google Earth
+ */
+export function exportToKML(waypoints: Waypoint[], filename = 'levantamiento_gps.kml') {
+  const kmlContent = generateKMLString(waypoints);
   const blob = new Blob([kmlContent], { type: 'application/vnd.google-earth.kml+xml;charset=utf-8;' });
   downloadBlob(blob, filename);
 }
@@ -248,8 +254,13 @@ export async function exportToZipWithPhotos(
   // Agregar CSV
   zip.file('datos_campo.csv', '\uFEFF' + csvLines.join('\r\n'));
 
+  // Agregar KML para Google Earth
+  onProgress?.(70, 'Generando archivo KML para Google Earth...');
+  const kmlString = generateKMLString(waypoints);
+  zip.file('levantamiento_campo.kml', kmlString);
+
   // Agregar GeoJSON
-  onProgress?.(75, 'Generando archivo GeoJSON y KML...');
+  onProgress?.(78, 'Generando archivo GeoJSON...');
   const features = waypoints.map((w) => ({
     type: 'Feature',
     geometry: {

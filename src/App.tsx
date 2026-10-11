@@ -51,7 +51,21 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 3000);
   }, []);
 
-  // Cargar datos iniciales desde IndexedDB
+  // Estado de conexión a Internet (Offline/Online)
+  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Cargar datos iniciales desde IndexedDB (Garantizando formulario limpio sin datos de ejemplo)
   useEffect(() => {
     async function loadData() {
       try {
@@ -59,15 +73,20 @@ export default function App() {
         setSettings(storedSettings);
 
         const storedWaypoints = await getWaypoints();
-        if (storedWaypoints.length > 0) {
-          setWaypoints(storedWaypoints);
-        } else {
-          // Si está vacío en la primera carga, inicializar con datos de prueba
-          const demoPoints = await createDemoWaypoints();
-          for (const dp of demoPoints) {
-            await saveWaypoint(dp);
+        // Filtrar y eliminar cualquier punto residual de demostración
+        const realWaypoints = storedWaypoints.filter((w) => !w.id.startsWith('demo_'));
+
+        for (const w of storedWaypoints) {
+          if (w.id.startsWith('demo_')) {
+            await deleteWaypoint(w.id);
           }
-          setWaypoints(demoPoints);
+        }
+
+        setWaypoints(realWaypoints);
+        if (realWaypoints.length === 0) {
+          const cleanSettings = { ...storedSettings, nextPointNumber: 1 };
+          setSettings(cleanSettings);
+          await saveProjectSettings(cleanSettings);
         }
       } catch (err) {
         console.error('Error cargando datos de IndexedDB:', err);
@@ -190,6 +209,7 @@ export default function App() {
           setIsCaptureOpen(true);
         }}
         error={gpsError}
+        isOnline={isOnline}
       />
 
       {/* 3. Área de Contenido Principal según Pestaña Activa */}
